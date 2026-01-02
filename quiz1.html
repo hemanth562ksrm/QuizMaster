@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizMaster - Test Your Knowledge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #6c63ff;
+            --secondary-color: #f5f5f5;
+            --accent-color: #ff6584;
+            --text-color: #333;
+            --light-text: #777;
+        }
+       
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+       
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+       
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+       
+        .btn-primary:hover {
+            background-color: #5a52d5;
+            border-color: #5a52d5;
+        }
+       
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+       
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+       
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+       
+        .card:hover {
+            transform: translateY(-5px);
+        }
+       
+        .quiz-card {
+            cursor: pointer;
+            height: 100%;
+        }
+       
+        .quiz-card .card-body {
+            display: flex;
+            flex-direction: column;
+        }
+       
+        .quiz-card .card-text {
+            flex-grow: 1;
+        }
+       
+        .quiz-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+       
+        .quiz-timer {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+       
+        .option-label {
+            display: block;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+       
+        .option-label:hover {
+            background-color: #f0f0f0;
+        }
+       
+        .option-input:checked + .option-label {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+       
+        .progress-container {
+            height: 8px;
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+       
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+       
+        .result-card {
+            text-align: center;
+            padding: 2rem;
+        }
+       
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+       
+        .history-item {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+       
+        .history-date {
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+       
+        .history-score {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+       
+        .welcome-screen {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+       
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+       
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: var(--light-text);
+            margin-bottom: 2rem;
+        }
+       
+        .hidden {
+            display: none !important;
+        }
+       
+        footer {
+            margin-top: auto;
+            padding: 1.5rem 0;
+            background-color: white;
+            border-top: 1px solid #eee;
+        }
+       
+        .badge-category {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+       
+        .feedback-message {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+       
+        .feedback-correct {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+       
+        .feedback-incorrect {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+       
+        .timer-warning {
+            color: #dc3545;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+       
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+       
+        .timer-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+       
+        .timer-bar {
+            flex-grow: 1;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+       
+        .timer-progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+            transition: width 1s linear;
+        }
+       
+        .timer-text {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+       
+        .timer-expired {
+            background-color: #dc3545;
+        }
+       
+        .timer-expired-text {
+            color: #dc3545;
+        }
+       
+        .timer-expired-text.warning {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-lightning-charge-fill"></i> QuizMaster</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item" id="nav-home">
+                        <a class="nav-link active" href="#"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item" id="nav-history">
+                        <a class="nav-link" href="#"><i class="bi bi-clock-history"></i> History</a>
+                    </li>
+                    <li class="nav-item" id="nav-profile">
+                        <a class="nav-link" href="#"><i class="bi bi-person-circle"></i> Profile</a>
+                    </li>
+                    <li class="nav-item" id="nav-logout">
+                        <a class="nav-link" href="#"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="welcome-screen">
+            <h1 class="welcome-title">Welcome to QuizMaster</h1>
+            <p class="welcome-subtitle">Test your knowledge with our wide range of quizzes!</p>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title text-center mb-4">Login to Continue</h5>
+                            <form id="login-form">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" required>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Login</button>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <small>Don't have an account? <a href="#" id="signup-link">Sign up</a></small>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Quiz Screen -->
+        <div id="main-content" class="hidden">
+            <div id="home-screen">
+                <h2 class="mb-4">Choose a Quiz Category</h2>
+                <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+                    <div class="col">
+                        <div class="card quiz-card h-100" data-quiz="studies">
+                            <div class="card-body text-center">
+                                <div class="quiz-icon">
+                                    <i class="bi bi-book"></i>
+                                </div>
+                                <h5 class="card-title">Studies</h5>
+                                <p class="card-text">Test your knowledge on various academic subjects.</p>
+                                <span class="badge bg-primary">10 Questions</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card quiz-card h-100" data-quiz="general-knowledge">
+                            <div class="card-body text-center">
+                                <div class="quiz-icon">
+                                    <i class="bi bi-globe"></i>
+                                </div>
+                                <h5 class="card-title">General Knowledge</h5>
+                                <p class="card-text">Broad questions about various topics around the world.</p>
+                                <span class="badge bg-primary">10 Questions</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card quiz-card h-100" data-quiz="national">
+                            <div class="card-body text-center">
+                                <div class="quiz-icon">
+                                    <i class="bi bi-flag"></i>
+                                </div>
+                                <h5 class="card-title">National</h5>
+                                <p class="card-text">Questions about your country's history and culture.</p>
+                                <span class="badge bg-primary">10 Questions</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card quiz-card h-100" data-quiz="international">
+                            <div class="card-body text-center">
+                                <div class="quiz-icon">
+                                    <i class="bi bi-airplane"></i>
+                                </div>
+                                <h5 class="card-title">International</h5>
+                                <p class="card-text">Questions about world geography and international relations.</p>
+                                <span class="badge bg-primary">10 Questions</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card quiz-card h-100" data-quiz="plants">
+                            <div class="card-body text-center">
+                                <div class="quiz-icon">
+                                    <i class="bi bi-flower1"></i>
+                                </div>
+                                <h5 class="card-title">Plants</h5>
+                                <p class="card-text">Test your knowledge about different plant species and botany.</p>
+                                <span class="badge bg-primary">10 Questions</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card quiz-card h-100" data-quiz="animals">
+                            <div class="card-body text-center">
+                                <div class="quiz-icon">
+                                    <i class="bi bi-emoji-smile"></i>
+                                </div>
+                                <h5 class="card-title">Animals</h5>
+                                <p class="card-text">Questions about different animal species and zoology.</p>
+                                <span class="badge bg-primary">10 Questions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quiz-screen" class="hidden">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 id="quiz-title">Quiz Title</h2>
+                    <div class="quiz-timer">
+                        <i class="bi bi-clock"></i> <span id="timer"></span>
+                    </div>
+                </div>
+               
+                <div class="timer-container">
+                    <div class="timer-bar">
+                        <div class="timer-progress" id="timer-progress"></div>
+                    </div>
+                    <div class="timer-text" id="timer-text">10:00</div>
+                </div>
+               
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+               
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 id="question-text">Question text will appear here</h4>
+                        <div id="options-container" class="mt-4">
+                            <!-- Options will be inserted here -->
+                        </div>
+                        <div id="feedback-container" class="mt-3 hidden">
+                            <!-- Feedback will be shown here -->
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="d-flex justify-content-between">
+                    <button id="prev-btn" class="btn btn-outline-primary" disabled>
+                        <i class="bi bi-arrow-left"></i> Previous
+                    </button>
+                    <button id="next-btn" class="btn btn-primary">
+                        Next <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="result-screen" class="hidden">
+                <div class="card result-card">
+                    <h2 id="result-title">Quiz Completed!</h2>
+                    <div class="score-display">
+                        <span id="score-value">0</span>/<span id="total-questions">10</span>
+                    </div>
+                    <p id="result-message">Great job! You've completed the quiz.</p>
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <button id="view-history-btn" class="btn btn-outline-primary">
+                            <i class="bi bi-clock-history"></i> View History
+                        </button>
+                        <button id="try-again-btn" class="btn btn-primary">
+                            <i class="bi bi-arrow-repeat"></i> Try Again
+                        </button>
+                        <button id="back-to-home-btn" class="btn btn-secondary">
+                            <i class="bi bi-house"></i> Home
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Screen -->
+            <div id="history-screen" class="hidden">
+                <h2 class="mb-4">Your Quiz History</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="history-list">
+                            <!-- History items will be inserted here -->
+                            <div class="text-center py-4" id="no-history-message">
+                                <i class="bi bi-clock-history" style="font-size: 2rem; color: #ccc;"></i>
+                                <p class="mt-2 text-muted">No quiz history yet. Take a quiz to see your results here!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Screen -->
+            <div id="profile-screen" class="hidden">
+                <h2 class="mb-4">Your Profile</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-primary text-white rounded-circle p-3 me-3">
+                                <i class="bi bi-person-circle" style="font-size: 2rem;"></i>
+                            </div>
+                            <div>
+                                <h4 id="profile-username">Username</h4>
+                                <p class="text-muted mb-0">Quiz Enthusiast</p>
+                            </div>
+                        </div>
+                       
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h3 id="total-quizzes">0</h3>
+                                        <p class="mb-0">Quizzes Taken</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h3 id="average-score">0%</h3>
+                                        <p class="mb-0">Average Score</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h3 id="best-score">0%</h3>
+                                        <p class="mb-0">Best Score</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                       
+                        <div class="-3">
+                            <h5>Change Password</h5>
+                            <form id="change-password-form">
+                                <div class="mb-3">
+                                    <label for="current-password" class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="current-password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="new-password" class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="new-password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirm-password" class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirm-password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Update Password</button>
+                            </form>
+                        </div>
+                       
+                        <div class="d-grid mt-4">
+                            <button id="logout-btn" class="btn btn-outline-danger">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-lightning-charge-fill"></i> QuizMaster</h5>
+                    <p>Test your knowledge with our wide range of quizzes.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy;  QuizMaster. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toast-title">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-message">
+                This is a notification message.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Quiz data
+        const quizzes = {
+            "studies": {
+                title: "Studies Quiz",
+                questions: [
+                    {
+                        question: "What is the chemical symbol for water?",
+                        options: ["H2O", "CO2", "O2", "NaCl"],
+                        answer: 0
+                    },
+                    {
+                        question: "Who wrote 'Romeo and Juliet'?",
+                        options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
+                        answer: 1
+                    },
+                    {
+                        question: "What is the largest planet in our solar system?",
+                        options: ["Earth", "Mars", "Jupiter", "Saturn"],
+                        answer: 2
+                    },
+                    {
+                        question: "What is the square root of 144?",
+                        options: ["12", "14", "10", "16"],
+                        answer: 0
+                    },
+                    {
+                        question: "Which of these is not a programming language?",
+                        options: ["Java", "Python", "Photoshop", "Ruby"],
+                        answer: 2
+                    },
+                    {
+                        question: "What is the capital of Australia?",
+                        options: ["Sydney", "Melbourne", "Canberra", "Perth"],
+                        answer: 2
+                    },
+                    {
+                        question: "Which element has the chemical symbol 'Fe'?",
+                        options: ["Gold", "Iron", "Silver", "Ferric"],
+                        answer: 1
+                    },
+                    {
+                        question: "What is the largest organ in the human body?",
+                        options: ["Heart", "Liver", "Brain", "Skin"],
+                        answer: 3
+                    },
+                    {
+                        question: "Who developed the theory of relativity?",
+                        options: ["Isaac Newton", "Albert Einstein", "Galileo Galilei", "Stephen Hawking"],
+                        answer: 1
+                    },
+                    {
+                        question: "What is the formula for calculating the area of a circle?",
+                        options: ["πr", "2πr", "πr²", "2πr²"],
+                        answer: 2
+                    }
+                ]
+            },
+            "general-knowledge": {
+                title: "General Knowledge Quiz",
+                questions: [
+                    {
+                        question: "Which is the largest ocean on Earth?",
+                        options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+                        answer: 3
+                    },
+                    {
+                        question: "Who painted the Mona Lisa?",
+                        options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
+                        answer: 2
+                    },
+                    {
+                        question: "What is the capital of Japan?",
+                        options: ["Seoul", "Beijing", "Tokyo", "Bangkok"],
+                        answer: 2
+                    },
+                    {
+                        question: "Which planet is known as the 'Red Planet'?",
+                        options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                        answer: 1
+                    },
+                    {
+                        question: "Who wrote 'To Kill a Mockingbird'?",
+                        options: ["J.K. Rowling", "Harper Lee", "Mark Twain", "F. Scott Fitzgerald"],
+                        answer: 1
+                    },
+                    {
+                        question: "What is the tallest mountain in the world?",
+                        options: ["K2", "Mount Everest", "Kangchenjunga", "Makalu"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which country is home to the kangaroo?",
+                        options: ["New Zealand", "South Africa", "Australia", "Brazil"],
+                        answer: 2
+                    },
+                    {
+                        question: "What is the hardest natural substance on Earth?",
+                        options: ["Gold", "Iron", "Diamond", "Platinum"],
+                        answer: 2
+                    },
+                    {
+                        question: "Which of these is not a primary color?",
+                        options: ["Red", "Blue", "Green", "Yellow"],
+                        answer: 3
+                    },
+                    {
+                        question: "Who is known as the father of modern physics?",
+                        options: ["Isaac Newton", "Albert Einstein", "Niels Bohr", "Stephen Hawking"],
+                        answer: 1
+                    }
+                ]
+            },
+            "national": {
+                title: "National Quiz",
+                questions: [
+                    {
+                        question: "What is the capital of India?",
+                        options: ["Mumbai", "Delhi", "Kolkata", "Chennai"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which river is known as the 'Ganga'?",
+                        options: ["Yamuna", "Brahmaputra", "Ganges", "Godavari"],
+                        answer: 2
+                    },
+                    {
+                        question: "Who is the current Prime Minister of India?",
+                        options: ["Manmohan Singh", "Narendra Modi", "Rahul Gandhi", "Amit Shah"],
+                        answer: 1
+                    },
+                    {
+                        question: "When is Independence Day celebrated in India?",
+                        options: ["15th January", "15th August", "26th January", "5th September"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which is the national animal of India?",
+                        options: ["Lion", "Tiger", "Elephant", "Leopard"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which state is known as the 'Fruit Basket of India'?",
+                        options: ["Kerala", "Punjab", "Himachal Pradesh", "Gujarat"],
+                        answer: 2
+                    },
+                    {
+                        question: "Which Indian cricketer has scored the most Test centuries?",
+                        options: ["Sachin Tendulkar", "Virat Kohli", "Rahul Dravid", "Sunil Gavaskar"],
+                        answer: 0
+                    },
+                    {
+                        question: "What is the largest railway station in India?",
+                        options: ["Chhatrapati Shivaji Maharaj Terminus", "Howrah Station", "New Delhi Railway Station", "Mumbai Central"],
+                        answer: 2
+                    },
+                    {
+                        question: "Which Indian state has the largest area?",
+                        options: ["Maharashtra", "Rajasthan", "Uttar Pradesh", "Madhya Pradesh"],
+                        answer: 1
+                    },
+                    {
+                        question: "Who wrote the national anthem of India?",
+                        options: ["Bankim Chandra Chatterjee", "Rabindranath Tagore", "Subramania Bharati", "Swami Vivekananda"],
+                        answer: 1
+                    }
+                ]
+            },
+            "international": {
+                title: "International Quiz",
+                questions: [
+                    {
+                        question: "What is the capital of France?",
+                        options: ["London", "Berlin", "Paris", "Madrid"],
+                        answer: 2
+                    },
+                    {
+                        question: "Which country is known as the 'Land of the Rising Sun'?",
+                        options: ["China", "South Korea", "Thailand", "Japan"],
+                        answer: 3
+                    },
+                    {
+                        question: "Which is the largest country in the world by area?",
+                        options: ["United States", "China", "Canada", "Russia"],
+                        answer: 3
+                    },
+                    {
+                        question: "What is the largest city in the world by population?",
+                        options: ["New York", "Tokyo", "London", "Shanghai"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which country is known as the 'Elephant Kingdom'?",
+                        options: ["India", "Thailand", "Nepal", "Vietnam"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which is the longest river in the world?",
+                        options: ["Amazon River", "Nile River", "Mississippi River", "Yangtze River"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which country has the largest population in the world?",
+                        options: ["India", "United States", "Russia", "China"],
+                        answer: 3
+                    },
+                    {
+                        question: "Which city is known as the 'Windy City'?",
+                        options: ["New York", "Chicago", "Boston", "Miami"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which country is known as the 'Land of the Long White Cloud'?",
+                        options: ["New Zealand", "Australia", "Fiji", "Samoa"],
+                        answer: 0
+                    },
+                    {
+                        question: "Which country has the largest military budget?",
+                        options: ["China", "Russia", "United States", "India"],
+                        answer: 2
+                    }
+                ]
+            },
+            "plants": {
+                title: "Plants Quiz",
+                questions: [
+                    {
+                        question: "What is the process by which plants make their food?",
+                        options: ["Photosynthesis", "Respiration", "Transpiration", "Digestion"],
+                        answer: 0
+                    },
+                    {
+                        question: "Which part of the plant makes food?",
+                        options: ["Roots", "Stem", "Leaves", "Flowers"],
+                        answer: 2
+                    },
+                    {
+                        question: "What is the green pigment in plants called?",
+                        options: ["Chlorophyll", "Carotene", "Xanthophyll", "Anthocyanin"],
+                        answer: 0
+                    },
+                    {
+                        question: "Which plant is known as the 'Tree of Life'?",
+                        options: ["Oak", "Banyan", "Palm", "Mango"],
+                        answer: 1
+                    },
+                    {
+                        question: "What do we call the process of water movement through a plant?",
+                        options: ["Photosynthesis", "Transpiration", "Respiration", "Evaporation"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which of these is a flowering plant?",
+                        options: ["Fern", "Moss", "Cactus", "Algae"],
+                        answer: 2
+                    },
+                    {
+                        question: "What is the scientific name for the largest flower in the world?",
+                        options: ["Titan Arum", "Rafflesia", "Victoria Amazonica", "Amorphophallus"],
+                        answer: 0
+                    },
+                    {
+                        question: "Which plant is used to make rubber?",
+                        options: ["Tea", "Coca", "Rubber Tree", "Sugarcane"],
+                        answer: 2
+                    },
+                    {
+                        question: "What is the study of plants called?",
+                        options: ["Zoology", "Botany", "Entomology", "Geology"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which plant is known as the 'Miracle Fruit'?",
+                        options: ["Tomato", "Mango", "Miracle Berry", "Strawberry"],
+                        answer: 2
+                    }
+                ]
+            },
+            "animals": {
+                title: "Animals Quiz",
+                questions: [
+                    {
+                        question: "Which animal is known as the 'King of the Jungle'?",
+                        options: ["Tiger", "Lion", "Elephant", "Gorilla"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which animal is known for its long neck?",
+                        options: ["Giraffe", "Zebra", "Kangaroo", "Hippopotamus"],
+                        answer: 0
+                    },
+                    {
+                        question: "Which animal is the largest mammal on Earth?",
+                        options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which animal is known as the 'Ship of the Desert'?",
+                        options: ["Horse", "Camel", "Donkey", "Llama"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which animal can fly but is not a bird?",
+                        options: ["Bat", "Butterfly", "Dragonfly", "Pterodactyl"],
+                        answer: 0
+                    },
+                    {
+                        question: "Which of these is not a primary color in animal fur?",
+                        options: ["Black", "White", "Brown", "Green"],
+                        answer: 3
+                    },
+                    {
+                        question: "Which animal is the fastest land animal?",
+                        options: ["Cheetah", "Lion", "Horse", "Greyhound"],
+                        answer: 0
+                    },
+                    {
+                        question: "Which animal is known for its hibernation?",
+                        options: ["Squirrel", "Bear", "Rabbit", "Fox"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which animal is known as the 'Man's Best Friend'?",
+                        options: ["Cat", "Dog", "Horse", "Cow"],
+                        answer: 1
+                    },
+                    {
+                        question: "Which animal has the largest brain relative to body size?",
+                        options: ["Dolphin", "Elephant", "Squirrel", "Shark"],
+                        answer: 2
+                    }
+                ]
+            }
+        };
+
+        // App state
+        let currentUser = null;
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let quizStartTime = 0;
+        let quizTimer = null;
+        let quizTimeRemaining = 600; // 10 minutes in seconds
+        let quizTimeExpired = false;
+        let quizHistory = [];
+
+        // DOM elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const mainContent = document.getElementById('main-content');
+        const homeScreen = document.getElementById('home-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const historyScreen = document.getElementById('history-screen');
+        const profileScreen = document.getElementById('profile-screen');
+
+        // Navigation elements
+        const navHome = document.getElementById('nav-home');
+        const navHistory = document.getElementById('nav-history');
+        const navProfile = document.getElementById('nav-profile');
+        const navLogout = document.getElementById('nav-logout');
+
+        // Quiz elements
+        const quizTitle = document.getElementById('quiz-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const timerElement = document.getElementById('timer');
+        const timerProgress = document.getElementById('timer-progress');
+        const timerText = document.getElementById('timer-text');
+
+        // Result elements
+        const resultTitle = document.getElementById('result-title');
+        const scoreValue = document.getElementById('score-value');
+        const totalQuestions = document.getElementById('total-questions');
+        const resultMessage = document.getElementById('result-message');
+        const viewHistoryBtn = document.getElementById('view-history-btn');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+        const backToHomeBtn = document.getElementById('back-to-home-btn');
+
+        // History elements
+        const historyList = document.getElementById('history-list');
+        const noHistoryMessage = document.getElementById('no-history-message');
+
+        // Profile elements
+        const profileUsername = document.getElementById('profile-username');
+        const totalQuizzes = document.getElementById('total-quizzes');
+        const averageScore = document.getElementById('average-score');
+        const bestScore = document.getElementById('best-score');
+        const changePasswordForm = document.getElementById('change-password-form');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Login form
+        const loginForm = document.getElementById('login-form');
+        const signupLink = document.getElementById('signup-link');
+
+        // Toast notification
+        const toast = document.getElementById('toast');
+        const toastTitle = document.getElementById('toast-title');
+        const toastMessage = document.getElementById('toast-message');
+        const bsToast = new bootstrap.Toast(toast);
+
+        // Show toast notification
+        function showToast(title, message) {
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            bsToast.show();
+        }
+
+        // Login form submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+           
+            // Simple validation
+            if (username.trim() === '' || password.trim() === '') {
+                showToast('Error', 'Please enter both username and password.');
+                return;
+            }
+           
+            // In a real app, you would validate credentials with a
+            // For this demo, we'll just set the current user and proceed
+            currentUser = {
+                username: username,
+                password: password,
+                quizzesTaken: 0,
+                totalScore: 0,
+                bestScore: 0
+            };
+           
+            // Load quiz history from localStorage if available
+            const savedHistory = localStorage.getItem('quizHistory');
+            if (savedHistory) {
+                quizHistory = JSON.parse(savedHistory);
+               
+                // Find user's history
+                const userHistory = quizHistory.filter(item => item.username === username);
+                if (userHistory.length > 0) {
+                    // Update user stats
+                    currentUser.quizzesTaken = userHistory.length;
+                    let totalScore = 0;
+                    let bestScore = 0;
+                   
+                    userHistory.forEach(item => {
+                        totalScore += item.score;
+                        if (item.score > bestScore) {
+                            bestScore = item.score;
+                        }
+                    });
+                   
+                    currentUser.totalScore = totalScore;
+                    currentUser.bestScore = bestScore;
+                }
+            }
+           
+            // Save current user to localStorage
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+           
+            // Show main content
+            welcomeScreen.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+            homeScreen.classList.remove('hidden');
+           
+            showToast('Success', 'You have successfully logged in!');
+           
+            // Update profile info
+            updateProfileInfo();
+        });
+
+        // Signup link click
+        signupLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showToast('Info', 'Sign up functionality would be implemented in a real application.');
+        });
+
+        // Quiz card click
+        document.querySelectorAll('.quiz-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const quizType = this.dataset.quiz;
+                startQuiz(quizType);
+            });
+        });
+
+        // Start quiz
+        function startQuiz(quizType) {
+            currentQuiz = quizzes[quizType];
+            currentQuestionIndex = 0;
+            userAnswers = new Array(currentQuiz.questions.length).fill(null);
+            quizTimeRemaining = 600; // Reset timer
+            quizTimeExpired = false;
+           
+            // Reset feedback
+            feedbackContainer.classList.add('hidden');
+           
+            // Show quiz screen
+            homeScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+           
+            // Set quiz title
+            quizTitle.textContent = currentQuiz.title;
+           
+            // Start timer
+            quizStartTime = new Date().getTime();
+            updateTimer();
+            clearInterval(quizTimer);
+            quizTimer = setInterval(updateTimer, 1000);
+           
+            // Load first question
+            loadQuestion();
+        }
+
+        // Update timer
+        function updateTimer() {
+            if (quizTimeExpired) return;
+           
+            quizTimeRemaining--;
+           
+            if (quizTimeRemaining <= 60) {
+                timerProgress.classList.add('timer-expired');
+                timerText.classList.add('timer-expired-text');
+               
+                if (quizTimeRemaining <= 30) {
+                    timerProgress.classList.add('timer-expired-text.warning');
+                }
+            }
+           
+            if (quizTimeRemaining <= 0) {
+                quizTimeExpired = true;
+                clearInterval(quizTimer);
+                finishQuiz();
+                return;
+            }
+           
+            const minutes = Math.floor(quizTimeRemaining / 60).toString().padStart(2, '0');
+            const seconds = (quizTimeRemaining % 60).toString().padStart(2, '0');
+            timerText.textContent = `${minutes}:${seconds}`;
+           
+            // Update timer bar
+            const percentage = (quizTimeRemaining / 600) * 100;
+            timerProgress.style.width = `${percentage}%`;
+        }
+
+        // Load question
+        function loadQuestion() {
+            const question = currentQuiz.questions[currentQuestionIndex];
+            questionText.textContent = question.question;
+           
+            // Clear options
+            optionsContainer.innerHTML = '';
+           
+            // Add options
+            question.options.forEach((option, index) => {
+                const optionId = `option-${index}`;
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'form-check';
+               
+                const input = document.createElement('input');
+                input.className = 'option-input';
+                input.type = 'radio';
+                input.name = 'quiz-option';
+                input.id = optionId;
+                input.value = index;
+               
+                // Check if user has already answered this question
+                if (userAnswers[currentQuestionIndex] === index) {
+                    input.checked = true;
+                }
+               
+                const label = document.createElement('label');
+                label.className = 'option-label';
+                label.htmlFor = optionId;
+                label.textContent = option;
+               
+                optionDiv.appendChild(input);
+                optionDiv.appendChild(label);
+                optionsContainer.appendChild(optionDiv);
+            });
+           
+            // Add event listeners to options
+            document.querySelectorAll('.option-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    userAnswers[currentQuestionIndex] = parseInt(this.value);
+                    feedbackContainer.classList.add('hidden');
+                });
+            });
+           
+            // Update progress bar
+            const progress = ((currentQuestionIndex + 1) / currentQuiz.questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+           
+            // Update buttons
+            prevBtn.disabled = currentQuestionIndex === 0;
+           
+            if (currentQuestionIndex === currentQuiz.questions.length - 1) {
+                nextBtn.textContent = 'Finish';
+                nextBtn.innerHTML = 'Finish <i class="bi bi-check-circle"></i>';
+            } else {
+                nextBtn.textContent = 'Next';
+                nextBtn.innerHTML = 'Next <i class="bi bi-arrow-right"></i>';
+            }
+           
+            // Show feedback if user has answered
+            if (userAnswers[currentQuestionIndex] !== null) {
+                showFeedback();
+            }
+        }
+
+        // Show feedback
+        function showFeedback() {
+            const question = currentQuiz.questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            const correctAnswer = question.answer;
+           
+            feedbackContainer.innerHTML = '';
+            feedbackContainer.classList.remove('hidden');
+           
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-message';
+           
+            if (userAnswer === correctAnswer) {
+                feedbackDiv.classList.add('feedback-correct');
+                feedbackDiv.innerHTML = '<i class="bi bi-check-circle"></i> Correct! Well done!';
+            } else {
+                feedbackDiv.classList.add('feedback-incorrect');
+                feedbackDiv.innerHTML = `<i class="bi bi-x-circle"></i> Incorrect! The correct answer is: ${question.options[correctAnswer]}`;
+            }
+           
+            feedbackContainer.appendChild(feedbackDiv);
+        }
+
+        // Previous button click
+        prevBtn.addEventListener('click', function() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        });
+
+        // Next button click
+        nextBtn.addEventListener('click', function() {
+            if (currentQuestionIndex < currentQuiz.questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        });
+
+        // Finish quiz
+        function finishQuiz() {
+            // Calculate score
+            let score = 0;
+            userAnswers.forEach((answer, index) => {
+                if (answer === currentQuiz.questions[index].answer) {
+                    score++;
+                }
+            });
+           
+            // Calculate time taken
+            const timeTaken = Math.floor((new Date().getTime() - quizStartTime) / 1000);
+            const minutes = Math.floor(timeTaken / 60);
+            const seconds = timeTaken % 60;
+            const timeString = `${minutes}m ${seconds}s`;
+           
+            // Update result screen
+            resultTitle.textContent = `${currentQuiz.title} Completed!`;
+            scoreValue.textContent = score;
+            totalQuestions.textContent = currentQuiz.questions.length;
+           
+            // Set result message
+            const percentage = (score / currentQuiz.questions.length) * 100;
+            if (percentage >= 80) {
+                resultMessage.textContent = `Excellent! You scored ${percentage.toFixed(1)}%.`;
+            } else if (percentage >= 60) {
+                resultMessage.textContent = `Good job! You scored ${percentage.toFixed(1)}%.`;
+            } else if (percentage >= 40) {
+                resultMessage.textContent = `Not bad! You scored ${percentage.toFixed(1)}%.`;
+            } else {
+                resultMessage.textContent = `You scored ${percentage.toFixed(1)}%. Try again to improve!`;
+            }
+           
+            // Save result to history
+            const result = {
+                username: currentUser.username,
+                quizType: currentQuiz.title,
+                score: score,
+                totalQuestions: currentQuiz.questions.length,
+                percentage: percentage.toFixed(1),
+                timeTaken: timeString,
+                date: new Date().toISOString(),
+                timeLimit: "10 minutes"
+            };
+           
+            quizHistory.push(result);
+            localStorage.setItem('quizHistory', JSON.stringify(quizHistory));
+           
+            // Update user stats
+            currentUser.quizzesTaken++;
+            currentUser.totalScore += score;
+            if (score > currentUser.bestScore) {
+                currentUser.bestScore = score;
+            }
+           
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+           
+            // Show result screen
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+           
+            // Update profile info
+            updateProfileInfo();
+        }
+
+        // View history button click
+        viewHistoryBtn.addEventListener('click', function() {
+            resultScreen.classList.add('hidden');
+            historyScreen.classList.remove('hidden');
+            loadHistory();
+        });
+
+        // Try again button click
+        tryAgainBtn.addEventListener('click', function() {
+            resultScreen.classList.add('hidden');
+            startQuiz(currentQuiz.title);
+        });
+
+        // Back to home button click
+        backToHomeBtn.addEventListener('click', function() {
+            resultScreen.classList.add('hidden');
+            homeScreen.classList.remove('hidden');
+        });
+
+        // Load history
+        function loadHistory() {
+            historyList.innerHTML = '';
+           
+            const userHistory = quizHistory.filter(item => item.username === currentUser.username);
+           
+            if (userHistory.length === 0) {
+                noHistoryMessage.classList.remove('hidden');
+                return;
+            }
+           
+            noHistoryMessage.classList.add('hidden');
+           
+            userHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+           
+            userHistory.forEach(item => {
+                const date = new Date(item.date);
+                const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+               
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+               
+                historyItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5>${item.quizType}</h5>
+                            <p class="mb-1">Score: <span class="history-score">${item.score}/${item.totalQuestions} (${item.percentage}%)</span></p>
+                            <p class="history-date mb-0">Completed on ${formattedDate}</p>
+                            <p class="mb-0">Time taken: ${item.timeTaken}</p>
+                            <p class="mb-0">Time limit: ${item.timeLimit}</p>
+                        </div>
+                    </div>
+                `;
+               
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Update profile info
+        function updateProfileInfo() {
+            profileUsername.textContent = currentUser.username;
+            totalQuizzes.textContent = currentUser.quizzesTaken;
+           
+            const avgScore = currentUser.quizzesTaken > 0 ?
+                ((currentUser.totalScore / currentUser.quizzesTaken) / currentQuiz.questions.length * 100).toFixed(1) : 0;
+           
+            averageScore.textContent = `${avgScore}%`;
+            bestScore.textContent = `${(currentUser.bestScore / currentQuiz.questions.length * 100).toFixed(1)}%`;
+        }
+
+        // Change password form submission
+        changePasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+           
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+           
+            if (currentPassword !== currentUser.password) {
+                showToast('Error', 'Current password is incorrect.');
+                return;
+            }
+           
+            if (newPassword !== confirmPassword) {
+                showToast('Error', 'New passwords do not match.');
+                return;
+            }
+           
+            if (newPassword.trim() === '') {
+                showToast('Error', 'New password cannot be empty.');
+                return;
+            }
+           
+            // Update password
+            currentUser.password = newPassword;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+           
+            // Clear form
+            changePasswordForm.reset();
+           
+            showToast('Success', 'Password updated successfully.');
+        });
+
+        // Logout button click
+        logoutBtn.addEventListener('click', function() {
+            // Clear current user
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+           
+            // Reset UI
+            mainContent.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+           
+            // Reset form
+            loginForm.reset();
+           
+            showToast('Success', 'You have been logged out.');
+        });
+
+        // Navigation events
+        navHome.addEventListener('click', function(e) {
+            e.preventDefault();
+            historyScreen.classList.add('hidden');
+            profileScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            homeScreen.classList.remove('hidden');
+        });
+
+        navHistory.addEventListener('click', function(e) {
+            e.preventDefault();
+            homeScreen.classList.add('hidden');
+            profileScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            historyScreen.classList.remove('hidden');
+            loadHistory();
+        });
+
+        navProfile.addEventListener('click', function(e) {
+            e.preventDefault();
+            homeScreen.classList.add('hidden');
+            historyScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            profileScreen.classList.remove('hidden');
+            updateProfileInfo();
+        });
+
+        navLogout.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Clear current user
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+           
+            // Reset UI
+            mainContent.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+           
+            // Reset form
+            loginForm.reset();
+           
+            showToast('Success', 'You have been logged out.');
+        });
+
+        // Check if user is already logged in
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+               
+                // Load quiz history from localStorage if available
+                const savedHistory = localStorage.getItem('quizHistory');
+                if (savedHistory) {
+                    quizHistory = JSON.parse(savedHistory);
+                }
+               
+                // Show main content
+                welcomeScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                homeScreen.classList.remove('hidden');
+               
+                showToast('Welcome back!', 'You are already logged in.');
+            }
+        });
+    </script>
+</body>
+</html>
